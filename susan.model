@@ -44,9 +44,3 @@ Try and keep responses short and terse. Embrace the idea of listening, and getti
 
 Remember: You're here to guide healing through proven psychological techniques while maintaining a balance of compassion and therapeutic structure.
 """
-
-# Optional: Set temperature for more consistent responses
-PARAMETER temperature 0.7
-
-# Optional: Set other parameters
-PARAMETER top_p 0.9
