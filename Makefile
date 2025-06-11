@@ -1,4 +1,4 @@
-.PHONY: create clean help
+.PHONY: create clean
 
 # Create the Susan model
 create:
@@ -7,13 +7,6 @@ create:
 # Remove the Susan model
 clean:
 	ollama rm susan
-
-# Show available targets
-help:
-	@echo "Available targets:"
-	@echo "  create  - Create the Susan model from susan.model"
-	@echo "  clean   - Remove the Susan model"
-	@echo "  help    - Show this help message"
 
 # Default target
 .DEFAULT_GOAL := create 
