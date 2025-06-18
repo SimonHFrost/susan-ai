@@ -1,0 +1,29 @@
+.env
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+
+# React Native
+android/
+ios/
+build/
+*.keystore
+
+# Metro
+metro-cache/
+
+# Misc
+*.log
+*.tmp
+*.swp
+.DS_Store
+.env.* 
