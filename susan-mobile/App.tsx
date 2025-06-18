@@ -5,6 +5,8 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import './global.css';
 
+console.log('ELEVEN_LABS_KEY:', process.env.ELEVEN_LABS_KEY);
+
 export default function App() {
   return (
     <SafeAreaProvider>
