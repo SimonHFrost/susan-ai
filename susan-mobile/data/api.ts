@@ -1,5 +1,5 @@
 // Configuration for different development environments
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   const backendUrl = process.env.BACKEND_URL;
   const backendPort = process.env.BACKEND_PORT;
   return `http://${backendUrl}:${backendPort}`;

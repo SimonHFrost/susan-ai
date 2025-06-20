@@ -1,7 +1,7 @@
 import { Text, View, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react-native';
-import { generateResponse } from '../data/api';
+import { generateResponse, getApiBaseUrl } from '../data/api';
 
 type Message = {
   id: string;
@@ -31,7 +31,12 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
   ]);
   const [inputText, setInputText] = useState('');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [serverUrl, setServerUrl] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    setServerUrl(getApiBaseUrl());
+  }, []);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -118,6 +123,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
       {!isKeyboardVisible && (
         <View className="justify-center items-center pb-4">
           <Text className="mb-4 text-2xl font-bold text-gray-800">{title}</Text>
+          {serverUrl ? <Text className="mb-4 text-xs text-gray-500">{serverUrl}</Text> : null}
           {children}
         </View>
       )}
