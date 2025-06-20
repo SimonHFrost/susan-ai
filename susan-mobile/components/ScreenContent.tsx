@@ -1,6 +1,7 @@
 import { Text, View, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react-native';
+import { generateResponse } from '../data/api';
 
 type Message = {
   id: string;
@@ -17,15 +18,7 @@ type ScreenContentProps = {
 };
 
 // Configuration for different development environments
-const getApiBaseUrl = () => {
-  // For iOS simulator and Android emulator, use the host machine's IP
-  // Replace with your actual IP address from ifconfig
-  const LOCAL_IP = '172.16.3.103';
-  
-  // For physical devices on the same network, use the same IP
-  // For web/desktop development, you might use localhost
-  return `http://${LOCAL_IP}:11434`;
-};
+// This has been moved to susan-mobile/data/api.ts
 
 export const ScreenContent = ({ title, path, children }: ScreenContentProps) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -89,56 +82,12 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
     setMessages(prev => [...prev, initialBotMessage]);
 
     try {
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      const response = await fetch(`${getApiBaseUrl()}/api/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'susan',
-          prompt: userPrompt,
-        }),
-        signal: controller.signal,
-      });
-
-      // Clear timeout if request succeeds
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Try to get the response as text first (React Native fallback)
-      const responseText = await response.text();
-      
-      if (!responseText) {
-        throw new Error('Empty response from server');
-      }
-
-      // Process the response text line by line
-      const lines = responseText.split('\n').filter(line => line.trim());
-      let accumulatedText = '';
-      
-      for (const line of lines) {
-        try {
-          const data = JSON.parse(line);
-          if (data.response) {
-            accumulatedText += data.response;
-          }
-        } catch (e) {
-          // Skip invalid JSON lines
-          console.warn('Failed to parse JSON line:', line);
-        }
-      }
+      const botResponseText = await generateResponse(userPrompt);
 
       // Update the bot message with the complete accumulated text
       setMessages(prev => prev.map(msg => 
         msg.id === botMessageId 
-          ? { ...msg, text: accumulatedText || 'I received your message but had trouble processing it. Please try again.', isLoading: false }
+          ? { ...msg, text: botResponseText, isLoading: false }
           : msg
       ));
 
@@ -147,13 +96,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
       let errorMessage = 'Sorry, I\'m having trouble connecting right now. Please try again.';
       
       if (error instanceof Error) {
-        if (error.message.includes('Network request failed')) {
-          errorMessage = 'Unable to connect to Susan. Make sure the server is running and accessible.';
-        } else if (error.name === 'AbortError') {
-          errorMessage = 'Response timed out. Susan might be thinking too hard! Please try again.';
-        } else if (error.message.includes('Failed to get response reader')) {
-          errorMessage = 'Connection issue with Susan. Please try sending your message again.';
-        }
+        errorMessage = error.message;
       }
       
       // Update with error message
@@ -173,7 +116,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
     >
       {/* Header with Susan animation - hide when keyboard is visible */}
       {!isKeyboardVisible && (
-        <View className="items-center justify-center pb-4">
+        <View className="justify-center items-center pb-4">
           <Text className="mb-4 text-2xl font-bold text-gray-800">{title}</Text>
           {children}
         </View>
@@ -183,7 +126,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
       <View className="flex-1 mx-4 mb-4">
         <ScrollView 
           ref={scrollViewRef}
-          className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm"
+          className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -234,7 +177,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
         <View className="mt-4">
           <View className="relative">
             <TextInput
-              className="w-full px-4 py-3 text-base bg-white border border-gray-200 rounded-l-lg pr-14 rounded-r-3xl"
+              className="px-4 py-3 pr-14 w-full text-base bg-white rounded-r-3xl rounded-l-lg border border-gray-200"
               placeholder="What's on your mind?"
               placeholderTextColor="#6B7280"
               value={inputText}
@@ -249,7 +192,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
             />
             <TouchableOpacity
               onPress={sendMessage}
-              className="absolute items-center justify-center p-2 -translate-y-1/2 bg-blue-500 rounded-full right-2 top-1/2"
+              className="absolute right-2 top-1/2 justify-center items-center p-2 bg-blue-500 rounded-full -translate-y-1/2"
               disabled={inputText.trim() === ''}
             >
               <Send color="white" size={20} />
