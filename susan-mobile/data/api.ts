@@ -1,14 +1,8 @@
-// susan-mobile/data/api.ts
-
 // Configuration for different development environments
 const getApiBaseUrl = () => {
-  // For iOS simulator and Android emulator, use the host machine's IP
-  // You may need to replace this with your actual local IP address
-  const LOCAL_IP = '172.16.3.103';
-  
-  // For physical devices on the same network, use the same IP
-  // For web/desktop development, you might use localhost
-  return `http://${LOCAL_IP}:11434`;
+  const backendUrl = process.env.BACKEND_URL;
+  const backendPort = process.env.BACKEND_PORT;
+  return `http://${backendUrl}:${backendPort}`;
 };
 
 export const generateResponse = async (prompt: string): Promise<string> => {
